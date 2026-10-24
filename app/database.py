@@ -8,21 +8,24 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL no está configurada")
+engine = None
+SessionLocal = None
 
-engine = create_engine(DATABASE_URL)
-
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+if DATABASE_URL:
+    engine = create_engine(DATABASE_URL)
+    SessionLocal = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine
+    )
 
 Base = declarative_base()
 
 
 def get_db():
+    if SessionLocal is None:
+        raise RuntimeError("DATABASE_URL no está configurada en las variables de entorno.")
+
     db = SessionLocal()
 
     try:
